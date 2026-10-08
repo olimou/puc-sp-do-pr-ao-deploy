@@ -28,9 +28,9 @@ application {
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
-
+git
 tasks.test {
     useJUnitPlatform()
     testLogging {
