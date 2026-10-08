@@ -1,0 +1,5 @@
+# Fixa a versão de Java do projeto (mise).
+# Prioridade sobre a config global: quem entra nesta pasta usa o Java 21.
+# (Gradle 8.10.2 não roda em JDKs muito novos, como o 24+.)
+[tools]
+java = "21"

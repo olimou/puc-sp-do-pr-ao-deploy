@@ -1,0 +1,117 @@
+# =============================================================
+#  Pipeline — CI + CD
+#
+#  Grafo de execução:
+#     Test ─┐
+#           ├─→ Deploy (simulado)
+#     Lint ─┘
+#
+#  - Em Pull Request: rodam Test e Lint EM PARALELO. O merge só é
+#    liberado quando os DOIS ficam verdes.
+#  - No merge (push na main): os dois rodam de novo e, se passarem,
+#    o Deploy roda — ou seja, o Deploy depende dos dois.
+#
+#  Obs.: no GitHub Actions, `needs` só enxerga jobs do MESMO workflow.
+#  É por isso que CI e CD vivem aqui no mesmo arquivo.
+# =============================================================
+name: Pipeline
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  # ------------------------------------------------------------
+  #  CI — Integração Contínua (roda em PRs e no merge)
+  # ------------------------------------------------------------
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Tornar o gradlew executável
+        run: chmod +x ./gradlew
+
+      - name: Rodar os testes unitários
+        run: ./gradlew test --no-daemon
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Tornar o gradlew executável
+        run: chmod +x ./gradlew
+
+      - name: Verificar o padrão de código (ktlint)
+        run: ./gradlew ktlintCheck --no-daemon
+
+  # ------------------------------------------------------------
+  #  CD — Entrega Contínua (roda só no merge para a main)
+  #  Depende de Test E Lint: se qualquer um falhar, o deploy não roda.
+  # ------------------------------------------------------------
+  deploy:
+    name: Deploy (simulado)
+    needs: [ test, lint ]
+    # Só faz deploy em push/manual na main — nunca em Pull Request.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Iniciar deploy
+        run: |
+          echo "======================================================"
+          echo "🚀 Iniciando deploy da aplicação"
+          echo "   Commit:      ${{ github.sha }}"
+          echo "   Ambiente:     produção (simulado)"
+          echo "   Disparado por: ${{ github.actor }}"
+          echo "------------------------------------------------------"
+          echo "📦 Empacotando o artefato........... ok"
+          echo "🔐 Validando checagens de qualidade. ok"
+          echo "🌐 Publicando o serviço............. ok"
+          echo "======================================================"
+
+      - name: Confirmar sucesso do deploy
+        run: |
+          echo ""
+          echo "✅ DEPLOY CONCLUÍDO COM SUCESSO"
+          echo "   Endpoint: https://puc-sp-do-pr-ao-deploy.exemplo.com/health"
+          echo ""
+
+      - name: Publicar resumo da entrega
+        run: |
+          {
+            echo "### 🚀 Deploy concluído com sucesso"
+            echo ""
+            echo "| Campo | Valor |"
+            echo "| --- | --- |"
+            echo "| **Commit** | \`${{ github.sha }}\` |"
+            echo "| **Ambiente** | produção (simulado) |"
+            echo "| **Autor** | @${{ github.actor }} |"
+            echo "| **Endpoint** | [health](https://puc-sp-do-pr-ao-deploy.exemplo.com/health) |"
+            echo ""
+            echo "> Este deploy é uma **simulação** para fins didáticos."
+          } >> "$GITHUB_STEP_SUMMARY"
