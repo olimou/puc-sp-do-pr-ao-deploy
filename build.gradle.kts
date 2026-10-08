@@ -30,7 +30,7 @@ application {
 kotlin {
     jvmToolchain(21)
 }
-git
+
 tasks.test {
     useJUnitPlatform()
     testLogging {
