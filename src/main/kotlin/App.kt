@@ -11,10 +11,10 @@ import io.ktor.server.routing.routing
 /**
  * Aplicação de exemplo do workshop.
  *
- * Expõe dois endpoints simples e uma função pura (`soma`) que é o alvo
- * dos testes automatizados:
- *   GET /health              -> {"status":"ok"}
- *   GET /soma?a=2&b=3        -> {"resultado":5}
+ * Endpoints:
+ *   GET /health         -> {"status":"ok"}
+ *   GET /soma?a=2&b=3   -> {"resultado":5}
+ *   GET /media?a=4&b=6  -> {"resultado":5}
  */
 fun main() {
     val port = System.getenv("PORT")?.toIntOrNull() ?: 8080
@@ -39,6 +39,23 @@ fun Application.module() {
             } else {
                 call.respondText(
                     """{"resultado":${soma(a, b)}}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.OK,
+                )
+            }
+        }
+        get("/media") {
+            val a = call.parameters["a"]?.toIntOrNull()
+            val b = call.parameters["b"]?.toIntOrNull()
+            if (a == null || b == null) {
+                call.respondText(
+                    """{"erro":"informe os parametros a e b"}""",
+                    ContentType.Application.Json,
+                    HttpStatusCode.BadRequest,
+                )
+            } else {
+                call.respondText(
+                    """{"resultado":${media(a, b)}}""",
                     ContentType.Application.Json,
                     HttpStatusCode.OK,
                 )
