@@ -50,4 +50,21 @@ class AppTest {
         assertEquals(0, soma(-1, 1))
         assertEquals(100, soma(40, 60))
     }
+
+    @Test
+    fun `endpoint subtracao calcula corretamente`() =
+        testApplication {
+            application { module() }
+
+            val response = client.get("/subtracao?a=5&b=3")
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals("""{"resultado":2}""", response.bodyAsText())
+        }
+
+    @Test
+    fun `funcao subtracao subtrai dois numeros`() {
+        assertEquals(2, subtracao(5, 3))
+        assertEquals(-4, subtracao(1, 5))
+    }
 }
