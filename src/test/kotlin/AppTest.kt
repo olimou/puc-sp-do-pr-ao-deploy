@@ -50,4 +50,15 @@ class AppTest {
         assertEquals(0, soma(-1, 1))
         assertEquals(100, soma(40, 60))
     }
+
+    @Test
+    fun `endpoint versao responde a versao atual`() =
+        testApplication {
+            application { module() }
+
+            val response = client.get("/versao")
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals("""{"versao":"0.1.0"}""", response.bodyAsText())
+        }
 }
