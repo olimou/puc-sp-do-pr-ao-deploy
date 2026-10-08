@@ -50,4 +50,21 @@ class AppTest {
         assertEquals(0, soma(-1, 1))
         assertEquals(100, soma(40, 60))
     }
+
+    @Test
+    fun `endpoint media calcula corretamente`() =
+        testApplication {
+            application { module() }
+
+            val response = client.get("/media?a=4&b=6")
+
+            assertEquals(HttpStatusCode.OK, response.status)
+            assertEquals("""{"resultado":5}""", response.bodyAsText())
+        }
+
+    @Test
+    fun `funcao media arredonda para o inteiro mais proximo`() {
+        assertEquals(5, media(4, 6))
+        assertEquals(7, media(6, 8))
+    }
 }
