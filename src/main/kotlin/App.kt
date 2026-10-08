@@ -73,5 +73,5 @@ fun soma(
 fun subtracao(
     a: Int,
     b: Int,
-): Int = a + b
+): Int = a - b
 // ): Int = a - b
